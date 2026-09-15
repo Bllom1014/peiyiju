@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>配一句 · 下一步启动看板</title>
+<style>
+  :root{
+    --green:#7CB342;
+    --green-d:#689F38;
+    --green-l:#EDF6E0;
+    --green-m:#A5D06A;
+    --ink:#2C2C2C;
+    --ink-2:#5A5A5A;
+    --ink-3:#8C8C8C;
+    --bg:#FAFAF7;
+    --card:#FFFFFF;
+    --line:#E8E8E0;
+    --amber:#E07856;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Helvetica Neue",sans-serif;
+    line-height:1.7;
+    padding:48px 24px 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;}
+
+  header{margin-bottom:40px;}
+  .kicker{
+    display:inline-block;font-size:13px;letter-spacing:.08em;color:var(--green-d);
+    background:var(--green-l);padding:5px 12px;border-radius:20px;margin-bottom:16px;font-weight:600;
+  }
+  h1{font-size:38px;line-height:1.3;letter-spacing:-.01em;margin-bottom:12px;}
+  h1 em{font-style:normal;color:var(--green);}
+  .sub{font-size:16px;color:var(--ink-2);max-width:660px;}
+
+  /* 进度条 */
+  .progress{
+    display:flex;align-items:center;gap:0;margin:32px 0 48px;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 24px;
+  }
+  .step{flex:1;text-align:center;position:relative;}
+  .step .dot{
+    width:34px;height:34px;border-radius:50%;margin:0 auto 8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:700;
+  }
+  .step .lbl{font-size:13px;font-weight:600;}
+  .step .note{font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .done .dot{background:var(--green);color:#fff;}
+  .done .lbl{color:var(--green-d);}
+  .now .dot{background:var(--ink);color:#fff;box-shadow:0 0 0 5px rgba(124,179,66,.18);}
+  .now .lbl{color:var(--ink);}
+  .todo .dot{background:#EFEFEA;color:var(--ink-3);}
+  .todo .lbl{color:var(--ink-3);}
+  .arrow{color:var(--ink-3);font-size:18px;flex:0 0 30px;text-align:center;}
+
+  h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em;}
+  .sec-desc{font-size:14px;color:var(--ink-2);margin-bottom:20px;}
+
+  section{margin-bottom:52px;}
+
+  /* 今天 */
+  .today{
+    background:var(--card);border:2px solid var(--green);border-radius:18px;padding:28px 30px;
+    box-shadow:0 4px 20px rgba(124,179,66,.10);
+  }
+  .today h2{color:var(--green-d);}
+  ol.todo-list{list-style:none;counter-reset:t;}
+  ol.todo-list li{
+    counter-increment:t;position:relative;padding:14px 0 14px 48px;
+    border-bottom:1px dashed var(--line);display:flex;align-items:flex-start;gap:12px;
+  }
+  ol.todo-list li:last-child{border-bottom:none;}
+  ol.todo-list li::before{
+    content:counter(t);position:absolute;left:0;top:16px;
+    width:28px;height:28px;border-radius:8px;background:var(--green-l);color:var(--green-d);
+    display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;
+  }
+  .t-main{flex:1;}
+  .t-title{font-weight:600;font-size:15.5px;}
+  .t-desc{font-size:13.5px;color:var(--ink-2);margin-top:3px;}
+  .t-time{
+    flex:0 0 auto;font-size:12px;color:var(--green-d);background:var(--green-l);
+    padding:3px 10px;border-radius:12px;font-weight:600;white-space:nowrap;margin-top:4px;
+  }
+
+  /* 三线 */
+  .tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .track{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 22px;
+    display:flex;flex-direction:column;
+  }
+  .track .tag{
+    font-size:12px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:6px;
+    align-self:flex-start;margin-bottom:12px;
+  }
+  .track.a .tag{background:#E8F0FA;color:#4A76A8;}
+  .track.b .tag{background:var(--green-l);color:var(--green-d);}
+  .track.c .tag{background:#FBEEE7;color:var(--amber);}
+  .track h3{font-size:18px;margin-bottom:4px;}
+  .track .when{font-size:12.5px;color:var(--ink-3);margin-bottom:14px;}
+  .track ul{list-style:none;flex:1;}
+  .track li{
+    font-size:13.5px;color:var(--ink-2);padding:7px 0 7px 18px;position:relative;
+    border-bottom:1px solid #F2F2EE;
+  }
+  .track li:last-child{border-bottom:none;}
+  .track li::before{
+    content:"";position:absolute;left:0;top:15px;width:6px;height:6px;border-radius:50%;
+    background:var(--green-m);
+  }
+  .track .foot{
+    margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--ink);
+  }
+  .track .foot b{color:var(--green-d);}
+
+  /* 验证方法 */
+  .woz{
+    display:grid;grid-template-columns:1.15fr 1fr;gap:20px;
+  }
+  .box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px;}
+  .box h3{font-size:17px;margin-bottom:14px;}
+  .box p{font-size:14px;color:var(--ink-2);margin-bottom:10px;}
+  .metric{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid #F2F2EE;}
+  .metric:last-child{border-bottom:none;}
+  .metric .m-name{font-size:14px;}
+  .metric .m-val{font-size:15px;font-weight:700;color:var(--green-d);}
+  .metric .m-hint{font-size:12px;color:var(--ink-3);display:block;font-weight:400;margin-top:1px;}
+  .stopline{
+    background:#FDF3F0;border:1px solid #F3D9CF;border-radius:12px;padding:16px 18px;margin-top:16px;
+    font-size:13.5px;color:#8A4A32;
+  }
+  .stopline b{color:var(--amber);}
+
+  /* 开发 */
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  th{
+    text-align:left;font-size:13px;color:var(--ink-2);font-weight:600;
+    padding:12px 16px;background:#F7F7F3;border-bottom:1px solid var(--line);
+  }
+  td{padding:12px 16px;font-size:14px;border-bottom:1px solid #F2F2EE;vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .pill{font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap;}
+  .p1{background:var(--green-l);color:var(--green-d);}
+  .p2{background:#F0F0EA;color:var(--ink-3);}
+  .day{color:var(--ink-3);font-size:13px;white-space:nowrap;}
+
+  .callout{
+    background:var(--green-l);border-radius:14px;padding:20px 24px;margin-top:20px;
+    font-size:14.5px;color:#3E5B22;
+  }
+  .callout b{color:#2F4719;}
+
+  footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3);}
+
+  @media (max-width:820px){
+    .tracks,.woz{grid-template-columns:1fr;}
+    h1{font-size:28px;}
+    .progress{flex-direction:column;gap:18px;}
+    .arrow{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">配一句 · AI 发圈助手</div>
+    <h1>设计已封板，下一步是 <em>三线并行</em></h1>
+    <p class="sub">11 屏设计稿 + 流程地图 + 招募海报已经够用了。现在继续画图不产生任何新信息。真正的未知在两处：资质什么时候下来，以及用户到底会不会天天用。这两件事都必须现在启动，因为它们各自都在"等"。</p>
+  </header>
+
+  <div class="progress">
+    <div class="step done"><div class="dot">✓</div><div class="lbl">需求定义</div><div class="note">痛点已锁定</div></div>
+    <div class="arrow">→</div>
+    <div class="step done"><div class="dot">✓</div><div class="lbl">产品设计</div><div class="note">11 屏已封板</div></div>
+    <div class="arrow">→</div>
+    <div class="step now"><div class="dot">3</div><div class="lbl">并行启动</div><div class="note">今天开始</div></div>
+    <div class="arrow">→</div>
+    <div class="step todo"><div class="dot">4</div><div class="lbl">MVP 开发</div><div class="note">第 2 周</div></div>
+    <div class="arrow">→</div>
+    <div class="step todo"><div class="dot">5</div><div class="lbl">内测上线</div><div class="note">第 4 周</div></div>
+  </div>
+
+  <section>
+    <div class="today">
+      <h2>今天就做完的 5 件事</h2>
+      <p class="sec-desc">全部是"启动一个等待流程"或"零成本动作"，不需要任何决策。</p>
+      <ol class="todo-list">
+        <li>
+          <div class="t-main">
+            <div class="t-title">注册微信小程序账号，拿到 AppID</div>
+            <div class="t-desc">mp.weixin.qq.com → 立即注册 → 小程序 → 邮箱激活 → 选"个人"先占坑（后面可升级为企业）。个人主体不能开支付，但内测期够用。</div>
+          </div>
+          <div class="t-time">30 分钟</div>
+        </li>
+        <li>
+          <div class="t-main">
+            <div class="t-title">启动营业执照办理</div>
+            <div class="t-desc">当地"全程电子化"政务 APP 或市场监管局网站，个体工商户即可，经营范围含"信息技术服务"。提交后 1–3 个工作日出结果——这是必须等的窗口期。</div>
+          </div>
+          <div class="t-time">1 小时</div>
+        </li>
+        <li>
+          <div class="t-main">
+            <div class="t-title">拉 30 个人进内测群</div>
+            <div class="t-desc">直接私信昨天朋友圈里点过赞、问过"怎么做到的"、要过链接的人。话术别客气：我做了一个帮你配文案的小东西，想请你当内测官，永久免费。<b>只要问过的人，不要纯点赞的人。</b></div>
+          </div>
+          <div class="t-time">2 小时</div>
+        </li>
+        <li>
+          <div class="t-main">
+            <div class="t-title">手搓 20 条种子文案，按"情绪 × 场景"打标签</div>
+            <div class="t-desc">这是你群里第一批回复素材，也决定产品的调性基线。写完自己读一遍：如果连你自己都不想发，就重写。</div>
+          </div>
+          <div class="t-time">2 小时</div>
+        </li>
+        <li>
+          <div class="t-main">
+            <div class="t-title">定死一个每日 10 分钟 SOP</div>
+            <div class="t-desc">早上 9 点在群里发"今日一句"；晚上 10 点复盘当天的请求数、被真实发出去的条数。写进日历，别靠意志力。</div>
+          </div>
+          <div class="t-time">10 分钟</div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>三条线，同时跑</h2>
+    <p class="sec-desc">A 和 B 是等待期，C 是执行期。串行做会浪费两周；并行做，等执照下来的那天你已经知道产品成不成立了。</p>
+    <div class="tracks">
+      <div class="track a">
+        <div class="tag">A · 资质线</div>
+        <h3>把"等"的时间花掉</h3>
+        <div class="when">今天启动 · 1–2 周等待</div>
+        <ul>
+          <li>营业执照（个体工商户）</li>
+          <li>小程序注册 + 主体认证</li>
+          <li>ICP / 小程序备案</li>
+          <li>类目选择：工具 → 信息服务</li>
+          <li>如需付费：开通微信支付（企业主体）</li>
+        </ul>
+        <div class="foot">这条线的价值是 <b>不阻塞</b>。它唯一的动作就是"今天提交"，然后忘了它。</div>
+      </div>
+
+      <div class="track b">
+        <div class="tag">B · 验证线</div>
+        <h3>用你自己当 AI</h3>
+        <div class="when">今天启动 · 跑 2–4 周</div>
+        <ul>
+          <li>群里不开发任何东西</li>
+          <li>用户发照片/关键词 → 你用 ChatGPT 生成 → 手工回群</li>
+          <li>逐条记录：复制了？改了？真发出去了？</li>
+          <li>攒真实语料，反哺 prompt</li>
+          <li>顺便验证广场冷启动意愿</li>
+        </ul>
+        <div class="foot">成本 <b>0 元</b>，唯一投入是你的时间。它买到的信息是"这东西值不值得写 1 周代码"。</div>
+      </div>
+
+      <div class="track c">
+        <div class="tag">C · 开发线</div>
+        <h3>等 B 有信号再动</h3>
+        <div class="when">第 2 周启动 · 约 1 周</div>
+        <ul>
+          <li>先写 prompt + 跑通 LLM 接口</li>
+          <li>再做 6 屏核心流程</li>
+          <li>广场 / 发布页挪到 V1.1</li>
+          <li>小程序原生 + 云开发，零服务器</li>
+        </ul>
+        <div class="foot">不要第 1 周就写代码。<b>先改 prompt</b>——文案质量是这产品唯一的护城河，代码不是。</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Wizard of Oz 怎么跑，以及什么时候该停</h2>
+    <p class="sec-desc">核心不是"验证需求"，是零成本把文案质量问题暴露出来。用户改你的句子，比用户说"不错"有用一百倍。</p>
+    <div class="woz">
+      <div class="box">
+        <h3>怎么算跑通了</h3>
+        <div class="metric">
+          <div><span class="m-name">想发率</span><span class="m-hint">生成的文案里被真实发出去的比例</span></div>
+          <div class="m-val">≥ 50%</div>
+        </div>
+        <div class="metric">
+          <div><span class="m-name">2 周留存</span><span class="m-hint">两周后还在群里提需求的人</span></div>
+          <div class="m-val">≥ 30%</div>
+        </div>
+        <div class="metric">
+          <div><span class="m-name">日均请求</span><span class="m-hint">30 人群里的自然活跃度</span></div>
+          <div class="m-val">≥ 8 条</div>
+        </div>
+        <div class="metric">
+          <div><span class="m-name">修改率</span><span class="m-hint">需要你改第二遍才算能用</span></div>
+          <div class="m-val">≤ 30%</div>
+        </div>
+        <div class="stopline">
+          <b>止损线：</b>第 4 周时群里日请求 &lt; 3 条，或者连续一周没人主动提需求 —— 需求不成立，停。这时候你已经用 4 周时间和 0 元成本换来了一个确定的"不"，比写完代码再发现便宜太多。
+        </div>
+      </div>
+
+      <div class="box">
+        <h3>每天记这 4 个数</h3>
+        <p>拿个表格或备忘录就行，别为了统计去搭系统。</p>
+        <p><b>1. 今天有几个人提了需求</b> —— 看活跃，不是看总人数。</p>
+        <p><b>2. 一共生成了多少条文案</b> —— 看人均频次，一个人一天要 3 条说明是真痛点。</p>
+        <p><b>3. 有几条被真的发出去了</b> —— 让用户在群里回一个"已发✅"，这是唯一的核心指标。</p>
+        <p><b>4. 有几条被改了、改成什么样</b> —— 把改动原样记下来，这些就是后面调 prompt 的黄金样本。</p>
+        <p style="margin-top:14px;color:var(--ink-3);font-size:13px;">第 2 周开始你会发现：用户提的需求开始重复。重复出现的那个场景，就是 V1 该主攻的场景。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>MVP 开发拆解（第 2 周启动）</h2>
+    <p class="sec-desc">11 屏不是都要进 V1。广场是冷启动最重的部分，先不上——它应该在你有 100 个真实用户之后才存在。</p>
+    <table>
+      <thead>
+        <tr><th style="width:36%">模块</th><th style="width:14%">优先级</th><th style="width:16%">排期</th><th>说明</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Prompt 工程 + LLM 接口</b></td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D1–D2</td>
+          <td>先用群里攒的真实语料调 20 轮，调到你自己满意再写页面。这一步决定产品生死。</td>
+        </tr>
+        <tr>
+          <td>S1 首页 · 三入口合一</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D3</td>
+          <td>照片 / 输入想法 / 润色，加平台选择前置。</td>
+        </tr>
+        <tr>
+          <td>S2 关键词结果 + S3 图片结果</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D3–D4</td>
+          <td>S3 需接图片识别（ vision 接口），成本略高，可先只上 S2。</td>
+        </tr>
+        <tr>
+          <td>S4 润色模式</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D4</td>
+          <td>前后对比，改动处高亮。复用 S2 的结果组件。</td>
+        </tr>
+        <tr>
+          <td>S8 加载态</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D4</td>
+          <td>等待期 2–5 秒，必须有反馈，否则用户以为卡了。</td>
+        </tr>
+        <tr>
+          <td>S6 文案库 + S10 自己写一句</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D5</td>
+          <td>本地存储即可。复制后自动入库、勾选"已发"自动填今天。</td>
+        </tr>
+        <tr>
+          <td>S7 照片预览 + S11 我的</td>
+          <td><span class="pill p1">P0</span></td>
+          <td class="day">D5–D6</td>
+          <td>S11 先只做统计 + 使用次数，设置项最简。</td>
+        </tr>
+        <tr>
+          <td>S5 灵感广场 + S9 发布页</td>
+          <td><span class="pill p2">V1.1</span></td>
+          <td class="day">延后</td>
+          <td>冷启动最重，等有 100 个真实用户再上。</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <b>技术选型建议：</b>微信小程序原生 + 微信云开发（云函数里调 LLM）。不用买服务器、不用备案域名、不用自己写后端，对单人开发是最短路径。成本上，按 9.9 元/月的定价、免费 3 次/天算，1000 DAU 的 API 支出大概每月几十到一两百块，毛利完全撑得住。
+    </div>
+  </section>
+
+  <footer>
+    配一句 · 启动看板 ｜ 生成于 2026-09-08 ｜ 设计稿已封板 11 屏，本看板覆盖封板之后的两周行动
+  </footer>
+
+</div>
+</body>
+</html>

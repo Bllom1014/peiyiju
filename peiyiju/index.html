@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>配一句 · AI 发圈助手</title>
+<meta name="description" content="不知道怎么发？丢张照片，或者说句话，AI 帮你配一句。">
+<meta name="theme-color" content="#7CB342">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="配一句">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ 内联 SVG 图标（禁止图标字体 / emoji） ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M12 3l2.2 5.3L20 10l-5.8 1.7L12 17l-2.2-5.3L4 10l5.8-1.7L12 3z"/><path d="M18.5 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2a3.2 3.2 0 0 0-4.5 0M9.2 14.8a3.2 3.2 0 0 0 4.5 0"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5h9a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3V4.5z"/><path d="M5 17a3 3 0 0 1 3-3h9"/><path d="M9 8h5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M8.5 7.5L12 4l3.5 3.5"/><path d="M5 13v5.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V13"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5L8 12l6.5 7"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M15 6.5V6A2 2 0 0 0 13 4H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 4l2.4 5 5.6.7-4 3.9 1 5.4L12 16.4 7 19l1-5.4-4-3.9L9.6 9 12 4z"/></symbol>
+  <symbol id="i-star-f" viewBox="0 0 24 24"><path d="M12 4l2.4 5 5.6.7-4 3.9 1 5.4L12 16.4 7 19l1-5.4-4-3.9L9.6 9 12 4z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.5h3l1.5-2.5h7L17 8.5h3a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.2"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.4-5.3"/><path d="M19 4v4h-4"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4.5l8.5 15H3.5L12 4.5z"/><path d="M12 10v4.2M12 16.6v.2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5.5" y="10.5" width="13" height="9" rx="2.2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 5L16 12l-6.5 7"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.2 6.2l2.8 2.8M15 15l2.8 2.8M17.8 6.2L15 9M9 15l-2.8 2.8"/></symbol>
+</svg>
+
+<div class="phone">
+
+  <!-- H5 地址栏（H1–H3 规格） -->
+  <div class="addrbar">
+    <svg class="ic-14"><use href="#i-lock"/></svg>
+    <span class="addr-url">peiyiju.app</span>
+    <button class="addr-share" id="shareBtn" aria-label="分享">
+      <svg class="ic-18"><use href="#i-share"/></svg>
+    </button>
+  </div>
+
+  <header class="topbar" id="topbar">
+    <button class="back-btn" id="backBtn" hidden aria-label="返回">
+      <svg class="ic-22"><use href="#i-back"/></svg>
+    </button>
+    <h1 class="topbar-title" id="topbarTitle">配一句</h1>
+    <span class="topbar-right" id="topbarRight"></span>
+  </header>
+
+  <main class="content" id="content">
+
+    <!-- ========== S1 首页 ========== -->
+    <section class="view" id="v-home">
+      <h1 class="page-title">不知道怎么发？</h1>
+      <p class="page-sub">丢张照片，或者说句话，AI 帮你配一句。</p>
+
+      <div class="field-label">要发在哪</div>
+      <div class="chip-row" id="platformRow"></div>
+
+      <div class="seg" id="modeTabs">
+        <button class="seg-item active" data-mode="create-text">说句话</button>
+        <button class="seg-item" data-mode="create-image">传照片</button>
+        <button class="seg-item" data-mode="polish">帮我润色</button>
+      </div>
+
+      <div class="pane" id="pane-text">
+        <textarea id="ideaInput" rows="3" placeholder="随便说点什么，比如：周末和朋友去露营，天特别蓝"></textarea>
+        <div class="chip-row soft" id="quickChips"></div>
+      </div>
+
+      <div class="pane" id="pane-image" hidden>
+        <label class="photo-drop" id="photoDrop">
+          <input type="file" id="photoInput" accept="image/*" hidden>
+          <div class="photo-empty" id="photoEmpty">
+            <svg class="ic-28"><use href="#i-camera"/></svg>
+            <p>点这里选一张照片</p>
+            <span>AI 先看懂画面，再帮你配</span>
+          </div>
+          <img id="photoPreview" alt="选中的照片" hidden>
+        </label>
+      </div>
+
+      <div class="pane" id="pane-polish" hidden>
+        <textarea id="polishInput" rows="4" placeholder="把你写的原文粘进来，比如：今天去了一个很好玩的地方，很开心"></textarea>
+        <p class="hint">保留你的意思，给出 5 种不同写法。</p>
+      </div>
+
+      <button class="btn-primary" id="generateBtn">配一句</button>
+      <p class="foot-note" id="homeFoot"></p>
+    </section>
+
+    <!-- ========== S7 照片预览确认 ========== -->
+    <section class="view" id="v-preview" hidden>
+      <div class="preview-frame"><img id="pvImg" alt=""></div>
+      <div class="field-label">AI 看到了</div>
+      <div class="chip-row soft" id="pvTags"></div>
+      <p class="hint" id="pvNote"></p>
+      <div class="row-btns">
+        <button class="btn-ghost" id="pvReselect">重选</button>
+        <button class="btn-primary" id="pvConfirm">就用这张</button>
+      </div>
+    </section>
+
+    <!-- ========== S8 加载态（3 处复用） ========== -->
+    <section class="view" id="v-loading" hidden>
+      <div class="loading-wrap">
+        <div class="dots"><i></i><i></i><i></i></div>
+        <p class="loading-title" id="loadingTitle">AI 正在帮你想…</p>
+        <p class="loading-sub" id="loadingSub">大概需要几秒</p>
+      </div>
+    </section>
+
+    <!-- ========== 网络错误（带重试） ========== -->
+    <section class="view" id="v-error" hidden>
+      <div class="error-wrap">
+        <svg class="ic-44 warn"><use href="#i-warn"/></svg>
+        <p class="error-title" id="errTitle">没配上</p>
+        <p class="error-desc" id="errDesc"></p>
+        <button class="btn-primary" id="errRetry">
+          <svg class="ic-18"><use href="#i-refresh"/></svg>重试
+        </button>
+        <button class="btn-ghost" id="errBack">返回修改</button>
+      </div>
+    </section>
+
+    <!-- ========== S2 结果 · 关键词 ========== -->
+    <section class="view" id="v-result-text" hidden>
+      <div class="result-head">
+        <span class="meta-chip" id="rtPlatform">朋友圈</span>
+        <span class="meta-text" id="rtCount"></span>
+      </div>
+      <div id="rtList"></div>
+      <button class="btn-ghost" id="rtMore">
+        <svg class="ic-18"><use href="#i-refresh"/></svg>换一批
+      </button>
+    </section>
+
+    <!-- ========== S3 结果 · 图片 ========== -->
+    <section class="view" id="v-result-image" hidden>
+      <div class="ri-head">
+        <img id="riImg" alt="">
+        <div class="ri-side">
+          <div class="field-label sm">AI 看到了</div>
+          <div class="chip-row soft tight" id="riTags"></div>
+        </div>
+      </div>
+      <div id="riList"></div>
+      <button class="btn-ghost" id="riMore">
+        <svg class="ic-18"><use href="#i-refresh"/></svg>换一批
+      </button>
+    </section>
+
+    <!-- ========== S4 结果 · 润色 ========== -->
+    <section class="view" id="v-result-polish" hidden>
+      <div class="field-label">原文</div>
+      <div class="orig-box" id="rpOrig"></div>
+      <div class="divider"><span>润色后</span></div>
+      <div id="rpList"></div>
+      <button class="btn-ghost" id="rpMore">
+        <svg class="ic-18"><use href="#i-refresh"/></svg>再来一版
+      </button>
+    </section>
+
+    <!-- ========== S5 广场 ========== -->
+    <section class="view" id="v-square" hidden>
+      <div class="sq-head">
+        <h2 class="section-title">广场</h2>
+        <button class="sq-post" id="sqPostBtn">
+          <svg class="ic-18"><use href="#i-plus"/></svg>发布
+        </button>
+      </div>
+      <p class="hint" id="sqHint"></p>
+      <div id="sqList"></div>
+    </section>
+
+    <!-- ========== S9 广场发布页 ========== -->
+    <section class="view" id="v-publish" hidden>
+      <textarea id="pubInput" rows="5" placeholder="写一句你想分享的文案…"></textarea>
+      <div class="field-label">场景</div>
+      <div class="chip-row soft" id="pubScenes"></div>
+      <div class="divider"><span>实时预览</span></div>
+      <div class="pub-preview">
+        <div class="pp-avatar av1"></div>
+        <div class="pp-body">
+          <div class="pp-top"><b>我</b><span>刚刚</span></div>
+          <div class="pp-text" id="ppText">还没写</div>
+          <div class="pp-tags" id="ppTags"></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="pubSubmit">发布到广场</button>
+    </section>
+
+    <!-- ========== S6 文案库 ========== -->
+    <section class="view" id="v-library" hidden>
+      <h2 class="section-title">文案库</h2>
+      <div class="lib-tabs" id="libTabs">
+        <button class="lib-tab active" data-f="all">全部</button>
+        <button class="lib-tab" data-f="collected">收藏</button>
+        <button class="lib-tab" data-f="used">用过</button>
+        <button class="lib-tab" data-f="written">我写的</button>
+      </div>
+      <div id="libList"></div>
+      <button class="btn-ghost" id="writeBtn">自己写一句</button>
+    </section>
+
+    <!-- ========== S10 自己写一句 ========== -->
+    <section class="view" id="v-write" hidden>
+      <textarea id="mineInput" rows="5" placeholder="写下你自己的句子…"></textarea>
+      <div class="field-label">标签</div>
+      <div class="chip-row soft" id="mineTags"></div>
+      <button class="btn-primary" id="saveMineBtn">存进文案库</button>
+    </section>
+
+    <!-- ========== S11 我的 ========== -->
+    <section class="view" id="v-mine" hidden>
+      <h1 class="page-title">我的</h1>
+      <div class="me-card">
+        <div class="me-avatar av2">配</div>
+        <div class="me-info">
+          <b>内测官</b>
+          <span id="meSince"></span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><b class="num" id="stGen">0</b><span>生成</span></div>
+        <div class="stat"><b class="num" id="stPub">0</b><span>已发</span></div>
+        <div class="stat"><b class="num" id="stCol">0</b><span>收藏</span></div>
+      </div>
+      <div class="set-list">
+        <button class="set-item" id="toInstall"><span>添加到主屏幕</span><svg class="ic-18 chev"><use href="#i-chev"/></svg></button>
+        <button class="set-item" id="toSettings"><span>API 设置</span><svg class="ic-18 chev"><use href="#i-chev"/></svg></button>
+        <button class="set-item" id="toAbout"><span>关于配一句</span><svg class="ic-18 chev"><use href="#i-chev"/></svg></button>
+      </div>
+      <div class="about-box" id="aboutBox" hidden>
+        <p>不知道怎么发？丢张照片，或者说句话，AI 帮你配一句。</p>
+        <p>内测版本。文案、收藏、设置都只存在这台手机上，不会上传服务器。</p>
+        <button class="btn-danger" id="clearAllBtn">清空本机全部数据</button>
+      </div>
+    </section>
+
+    <!-- ========== 设置 ========== -->
+    <section class="view" id="v-settings" hidden>
+      <div class="warn-box">
+        <b>先读这段</b>
+        <p>网页版直连大模型，密钥存在本机、请求不过我们的服务器。但前端直连的密钥理论上可被提取——<b>只填低额度 Key，只给内测用</b>。正式对外请把 app.js 顶部的 <code>USE_PROXY</code> 改成 true 指向云函数。</p>
+      </div>
+      <label class="field"><span>服务商</span>
+        <select id="cfgProvider">
+          <option value="deepseek">DeepSeek（便宜，不支持看图）</option>
+          <option value="zhipu">智谱 GLM（支持看图）</option>
+          <option value="openai">OpenAI</option>
+          <option value="custom">自定义（OpenAI 兼容）</option>
+        </select>
+      </label>
+      <label class="field"><span>API Key</span><input type="password" id="cfgKey" placeholder="sk-..."></label>
+      <label class="field"><span>Base URL</span><input type="text" id="cfgBase" placeholder="https://api.deepseek.com/v1"></label>
+      <label class="field"><span>文本模型</span><input type="text" id="cfgModel" placeholder="deepseek-chat"></label>
+      <label class="field"><span>视觉模型（选填）</span><input type="text" id="cfgVision" placeholder="glm-4v-flash"></label>
+      <button class="btn-primary" id="saveCfgBtn">保存并测试</button>
+      <p class="cfg-status" id="cfgStatus"></p>
+    </section>
+
+  </main>
+
+  <!-- 底部胶囊导航 -->
+  <nav class="nav-wrap" id="navWrap">
+    <div class="nav-capsule">
+      <button class="tab active" data-v="home">
+        <svg class="ic-18"><use href="#i-pen"/></svg><span>配一句</span>
+      </button>
+      <button class="tab" data-v="square">
+        <svg class="ic-18"><use href="#i-square"/></svg><span>广场</span>
+      </button>
+      <button class="tab" data-v="library">
+        <svg class="ic-18"><use href="#i-book"/></svg><span>文案库</span>
+      </button>
+      <button class="tab" data-v="mine">
+        <svg class="ic-18"><use href="#i-user"/></svg><span>我的</span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
